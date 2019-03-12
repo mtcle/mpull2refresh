@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 
 apply plugin: 'com.github.dcendents.android-maven'
-group='gitee.com.mtcle'//最后一个是git账号
+apply plugin: 'com.jfrog.bintray'
 
 android {
     compileSdkVersion 28
@@ -22,3 +22,70 @@ android {
 
 dependencies {
 }
+
+//------------------------上传maven仓库配置开始-----------------------------
+def siteUrl =project.siteUrl //项目在github主页地址
+def gitUrl = project.gitUrl //Git仓库的地址
+def groupId=project.groupId//groupId
+
+group = groupId//groupId
+version = "1.0.0"//发布aar的库版本
+//def jcenterName='fastCore'
+def artifactIdModule='mpull2refresh'
+//project.archivesBaseName = projectName
+install {
+    repositories.mavenInstaller {
+        // This generates POM.xml with proper parameters
+        pom {
+            project {
+                packaging 'aar'
+                name artifactIdModule//添加项目描述
+                artifactId artifactIdModule //默认使用module名称
+                url siteUrl
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'mtcle'//设置自己ID
+                        name 'mtcle'//设置自己名字
+                        email 'mtcle@126.com'//设置自己邮箱
+                    }
+                }
+                scm {
+                    connection gitUrl
+                    developerConnection gitUrl
+                    url siteUrl
+                }
+            }
+        }
+    }
+}
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+artifacts {
+//    archives javadocJar
+    archives sourcesJar
+}
+
+bintray {
+    user = project.bintrayUser
+    key = project.bintrayKey
+    configurations = ['archives']
+    pkg {
+        repo = "maven"
+        name = artifactIdModule//项目在JCenter的名字
+        websiteUrl = siteUrl
+        vcsUrl = gitUrl
+        licenses = ["Apache-2.0"]
+        publish = true
+    }
+}
+//------------------上传maven仓库配置结束------------------------
